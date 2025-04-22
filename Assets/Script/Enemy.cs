@@ -58,14 +58,24 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void SetActivate()
+    {
+        isAlive = true;
+        isMoving = true;
+        hp = 100f;
+    }
+
     // 데미지를 받는 함수
     public void Damaged(float damage)
     {
         // 이미 죽었다면 데미지를 받지 않음
-        if (!isAlive) return;
+        if (isAlive == false)
+        {
+            return;
+        }
 
         // HP 감소
-        hp -= damage;
+        hp -= damage; // hp = hp - damage;
 
         Debug.Log($"{gameObject.name}이(가) {damage}의 데미지를 받았습니다. 남은 HP: {hp}");
 
