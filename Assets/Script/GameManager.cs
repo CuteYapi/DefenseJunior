@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private UnityEngine.UI.Text lifePointText; // 생명력 표시 텍스트
 
-    public PoolManager Pool;
-
     // 시작 시 호출
     private void Start()
     {
@@ -52,19 +50,25 @@ public class GameManager : MonoBehaviour
     // 적 소환 메서드
     private void SpawnEnemy()
     {
-        // Enemy 가져오기
-        Enemy enemyScript = Pool.GetEnemy();
+        // 적 프리팹 생성
+        GameObject newEnemy = Instantiate(enemyPrefab, spawnPosition.position, Quaternion.identity);
 
-        enemyScript.gameObject.SetActive(true);
-        enemyScript.gameObject.transform.position = spawnPosition.position;
-        enemyScript.SetActivate();
+        // Enemy 스크립트 참조 가져오기
+        Enemy enemyScript = newEnemy.GetComponent<Enemy>();
 
-        // 타겟 위치 설정
-        enemyScript.SetTargetPosition(targetPosition);
+        // Enemy 스크립트가 있는지 확인
+        if (enemyScript != null)
+        {
+            // 타겟 위치 설정
+            enemyScript.SetTargetPosition(targetPosition);
 
-        // Enemy 도착 이벤트 등록 (OnEnemyReachedTarget 메서드를 호출하도록 설정)
-        StartCoroutine(CheckEnemyReachedTarget(enemyScript, enemyScript.gameObject));
-
+            // Enemy 도착 이벤트 등록 (OnEnemyReachedTarget 메서드를 호출하도록 설정)
+            StartCoroutine(CheckEnemyReachedTarget(enemyScript, newEnemy));
+        }
+        else
+        {
+            Debug.LogError("생성된 적에 Enemy 스크립트가 없습니다!");
+        }
     }
 
     // 적이 목표에 도달했는지 확인하는 코루틴
