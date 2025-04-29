@@ -1,8 +1,14 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    // 스테이지 관련 변수
+    [Header("Stage Settings")]
+    public List<SpawnData> SpawnDataList = new List<SpawnData>();
+    [SerializeField] private int CurrentStageIndex;
+
     // 적 소환 관련 변수
     [Header("Enemy Spawn Settings")]
     [SerializeField] private GameObject enemyPrefab; // 소환할 적 프리팹
@@ -19,6 +25,11 @@ public class GameManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private UnityEngine.UI.Text lifePointText; // 생명력 표시 텍스트
 
+    // PoolManager
+    [Header("PoolManager")]
+    public PoolManager Pool;
+    
+
     // 시작 시 호출
     private void Start()
     {
@@ -28,6 +39,8 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager에 필요한 참조가 설정되지 않았습니다!");
             return;
         }
+
+        CurrentStageIndex = 0;
 
         // UI 업데이트
         UpdateLifePointUI();
@@ -39,10 +52,25 @@ public class GameManager : MonoBehaviour
     // 적 소환 코루틴
     private IEnumerator SpawnEnemyRoutine()
     {
+        int spawnCount = 0;
+
         // 게임이 활성화된 동안 반복
         while (gameActive)
         {
             SpawnEnemy();
+            spawnCount++;
+
+            if(spawnCount >= SpawnDataList[CurrentStageIndex].Count)
+            {
+                CurrentStageIndex++;
+                spawnCount = 0;
+            }
+
+            if (CurrentStageIndex >= SpawnDataList.Count)
+            {
+                CurrentStageIndex = 0;
+            }
+
             yield return new WaitForSeconds(spawnTime);
         }
     }
@@ -50,11 +78,22 @@ public class GameManager : MonoBehaviour
     // 적 소환 메서드
     private void SpawnEnemy()
     {
-        // 적 프리팹 생성
-        GameObject newEnemy = Instantiate(enemyPrefab, spawnPosition.position, Quaternion.identity);
-
-        // Enemy 스크립트 참조 가져오기
-        Enemy enemyScript = newEnemy.GetComponent<Enemy>();
+        Enemy enemyScript = null;
+        switch (SpawnDataList[CurrentStageIndex].Type)
+        {
+            case 1:
+                enemyScript = Pool.GetEnemy();
+                break;
+            case 2:
+                enemyScript = Pool.GetEnemy_1();
+                break;
+            case 3:
+                enemyScript = Pool.GetEnemy_2();
+                break;
+            default:
+                Debug.LogError("올바르지 않는 Enemy 타입이 입력되었습니다!");
+                goto case 1;
+        }
 
         // Enemy 스크립트가 있는지 확인
         if (enemyScript != null)
@@ -62,8 +101,14 @@ public class GameManager : MonoBehaviour
             // 타겟 위치 설정
             enemyScript.SetTargetPosition(targetPosition);
 
+            // 생성 위치 설정
+            enemyScript.transform.position = spawnPosition.position;
+            
+            // 상태 초기화
+            enemyScript.StatusReset();
+
             // Enemy 도착 이벤트 등록 (OnEnemyReachedTarget 메서드를 호출하도록 설정)
-            StartCoroutine(CheckEnemyReachedTarget(enemyScript, newEnemy));
+            StartCoroutine(CheckEnemyReachedTarget(enemyScript, enemyScript.gameObject));
         }
         else
         {

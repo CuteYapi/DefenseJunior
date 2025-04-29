@@ -3,7 +3,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     // HP 값
-    [SerializeField] private float hp = 100f;
+    [SerializeField] private float hp;
+    [SerializeField] private float maxHp;
 
     // Inspector에서 할당할 목표 위치의 Transform
     [SerializeField] private Transform targetPosition;
@@ -24,7 +25,7 @@ public class Enemy : MonoBehaviour
         if (targetPosition != null)
         {
             // 이동 시작
-            isMoving = true;
+            StatusReset();
         }
         else
         {
@@ -58,6 +59,19 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void StatusReset()
+    {
+        hp = maxHp;
+
+        isAlive = true;
+        isMoving = true;
+
+        Debug.Log($"{gameObject.name}이(가) 초기화됐습니다.");
+
+        // 게임 오브젝트 활성화
+        gameObject.SetActive(true);
+    }
+
     // 데미지를 받는 함수
     public void Damaged(float damage)
     {
@@ -65,7 +79,7 @@ public class Enemy : MonoBehaviour
         if (!isAlive) return;
 
         // HP 감소
-        hp -= damage;
+        hp -= damage; // hp = hp - damaged;
 
         Debug.Log($"{gameObject.name}이(가) {damage}의 데미지를 받았습니다. 남은 HP: {hp}");
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerCharacter : MonoBehaviour
@@ -11,8 +12,11 @@ public class PlayerCharacter : MonoBehaviour
     [Header("Attack Settings")]
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float attackCooldown = 1f;
-    [SerializeField] private GameObject attackFXPrefab; // 공격 이펙트 프리팹
     [SerializeField] private float attackFXDuration = 1f; // 이펙트 지속 시간
+    [SerializeField] private int attackFXType; // 이펙트 종류
+
+    [Header("Manager")]
+    [SerializeField] private PoolManager pool;
 
     private GameObject currentTarget;
     private float nextAttackTime;
@@ -106,16 +110,47 @@ public class PlayerCharacter : MonoBehaviour
     // 공격 이펙트를 생성하는 함수
     private void SpawnAttackFX(Vector3 position)
     {
-        // 이펙트 프리팹이 설정되었는지 확인
-        if (attackFXPrefab != null)
+        // 이펙트 가져오기 => 어떤 이펙트를 가져올지 구분하기
+        ParticleSystem targetFx = null;
+        switch (attackFXType)
         {
-            // 이펙트 프리팹 인스턴스화
-            GameObject fxInstance = Instantiate(attackFXPrefab, position, Quaternion.identity);
-
-            // 일정 시간 후 이펙트 제거
-            Destroy(fxInstance, attackFXDuration);
+            case 1:
+                {
+                    targetFx = pool.GetFx();
+                }
+                break;
+            case 2:
+                {
+                    targetFx = pool.GetFx_1();
+                }
+                break;
+            case 3:
+                {
+                    targetFx = pool.GetFx_2();
+                }
+                break;
+            default:
+                Debug.LogError("올바르지 않는 이펙트 타입이 입력되었습니다!");
+                goto case 1;
         }
+
+        // 1. 이펙트를 대상 위치에 이펙트를 옮기고 재생하기
+        targetFx.transform.position = position;
+        targetFx.gameObject.SetActive(true);
+        targetFx.Play();
+
+        // 2. 이펙트 재생이 끝나면 제거하기
+        StartCoroutine(SetOffFx(targetFx));
     }
+
+    // 일정 시간 뒤 이펙트 제거하기
+    private IEnumerator SetOffFx(ParticleSystem Fx)
+    {
+        yield return new WaitForSeconds(attackFXDuration);
+        Fx.Stop();
+        Fx.gameObject.SetActive(false);
+    }
+
 
     // 디버그용으로 감지 범위를 에디터에서 시각화
     private void OnDrawGizmos()
