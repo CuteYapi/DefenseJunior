@@ -1,60 +1,63 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // ½ºÅ×ÀÌÁö °ü·Ã º¯¼ö
+    // ìŠ¤í…Œì´ì§€ ê´€ë ¨ ë³€ìˆ˜
     [Header("Stage Settings")]
     public List<SpawnData> SpawnDataList = new List<SpawnData>();
     [SerializeField] private int CurrentStageIndex;
 
-    // Àû ¼ÒÈ¯ °ü·Ã º¯¼ö
+    // ì  ì†Œí™˜ ê´€ë ¨ ë³€ìˆ˜
     [Header("Enemy Spawn Settings")]
-    [SerializeField] private GameObject enemyPrefab; // ¼ÒÈ¯ÇÒ Àû ÇÁ¸®ÆÕ
-    [SerializeField] private Transform spawnPosition; // Àû ¼ÒÈ¯ À§Ä¡
-    [SerializeField] private Transform targetPosition; // ÀûÀÇ ¸ñÇ¥ À§Ä¡
-    [SerializeField] private float spawnTime = 2f; // Àû ¼ÒÈ¯ °£°İ
+    [SerializeField] private GameObject enemyPrefab; // ì†Œí™˜í•  ì  í”„ë¦¬íŒ¹
+    [SerializeField] private Transform spawnPosition; // ì  ì†Œí™˜ ìœ„ì¹˜
+    [SerializeField] private Transform targetPosition; // ì ì˜ ëª©í‘œ ìœ„ì¹˜
+    [SerializeField] private float spawnTime = 2f; // ì  ì†Œí™˜ ê°„ê²©
+    private HashSet<Enemy> enemySet = new HashSet<Enemy>();
 
-    // ÇÃ·¹ÀÌ¾î °ü·Ã º¯¼ö
+    // í”Œë ˆì´ì–´ ê´€ë ¨ ë³€ìˆ˜
     [Header("Player Settings")]
-    [SerializeField] private int playerLifePoint = 3; // ÇÃ·¹ÀÌ¾î »ı¸í·Â
-    [SerializeField] private bool gameActive = true; // °ÔÀÓ È°¼ºÈ­ »óÅÂ
+    [SerializeField] private int playerLifePoint = 3; // í”Œë ˆì´ì–´ ìƒëª…ë ¥
+    [SerializeField] private bool gameActive = true; // ê²Œì„ í™œì„±í™” ìƒíƒœ
 
-    // UI °ü·Ã º¯¼ö (ÇÊ¿ä½Ã Ãß°¡)
+    // UI ê´€ë ¨ ë³€ìˆ˜ (í•„ìš”ì‹œ ì¶”ê°€)
     [Header("UI References")]
-    [SerializeField] private UnityEngine.UI.Text lifePointText; // »ı¸í·Â Ç¥½Ã ÅØ½ºÆ®
+    [SerializeField] private UnityEngine.UI.Text lifePointText; // ìƒëª…ë ¥ í‘œì‹œ í…ìŠ¤íŠ¸
 
-    // PoolManager
-    [Header("PoolManager")]
-    public PoolManager Pool;
-    
+    public static GameManager Game { get; private set; }
 
-    // ½ÃÀÛ ½Ã È£Ãâ
+    private void Awake()
+    {
+        Game = this;
+    }
+
+    // ì‹œì‘ ì‹œ í˜¸ì¶œ
     private void Start()
     {
-        // ÃÊ±â ¼³Á¤ È®ÀÎ
+        // ì´ˆê¸° ì„¤ì • í™•ì¸
         if (enemyPrefab == null || spawnPosition == null || targetPosition == null)
         {
-            Debug.LogError("GameManager¿¡ ÇÊ¿äÇÑ ÂüÁ¶°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("GameManagerì— í•„ìš”í•œ ì°¸ì¡°ê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             return;
         }
 
         CurrentStageIndex = 0;
 
-        // UI ¾÷µ¥ÀÌÆ®
+        // UI ì—…ë°ì´íŠ¸
         UpdateLifePointUI();
 
-        // Àû ¼ÒÈ¯ ÄÚ·çÆ¾ ½ÃÀÛ
+        // ì  ì†Œí™˜ ì½”ë£¨í‹´ ì‹œì‘
         StartCoroutine(SpawnEnemyRoutine());
     }
 
-    // Àû ¼ÒÈ¯ ÄÚ·çÆ¾
+    // ì  ì†Œí™˜ ì½”ë£¨í‹´
     private IEnumerator SpawnEnemyRoutine()
     {
         int spawnCount = 0;
 
-        // °ÔÀÓÀÌ È°¼ºÈ­µÈ µ¿¾È ¹İº¹
+        // ê²Œì„ì´ í™œì„±í™”ëœ ë™ì•ˆ ë°˜ë³µ
         while (gameActive)
         {
             SpawnEnemy();
@@ -75,84 +78,79 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Àû ¼ÒÈ¯ ¸Ş¼­µå
+    // ì  ì†Œí™˜ ë©”ì„œë“œ
     private void SpawnEnemy()
     {
         Enemy enemyScript = null;
         switch (SpawnDataList[CurrentStageIndex].Type)
         {
             case 1:
-                enemyScript = Pool.GetEnemy();
+                enemyScript = PoolManager.Pool.GetEnemy();
                 break;
             case 2:
-                enemyScript = Pool.GetEnemy_1();
+                enemyScript = PoolManager.Pool.GetEnemy_1();
                 break;
             case 3:
-                enemyScript = Pool.GetEnemy_2();
+                enemyScript = PoolManager.Pool.GetEnemy_2();
                 break;
             default:
-                Debug.LogError("¿Ã¹Ù¸£Áö ¾Ê´Â Enemy Å¸ÀÔÀÌ ÀÔ·ÂµÇ¾ú½À´Ï´Ù!");
+                Debug.LogError("ì˜¬ë°”ë¥´ì§€ ì•ŠëŠ” Enemy íƒ€ì…ì´ ì…ë ¥ë˜ì—ˆìŠµë‹ˆë‹¤!");
                 goto case 1;
         }
 
-        // Enemy ½ºÅ©¸³Æ®°¡ ÀÖ´ÂÁö È®ÀÎ
-        if (enemyScript != null)
-        {
-            // Å¸°Ù À§Ä¡ ¼³Á¤
-            enemyScript.SetTargetPosition(targetPosition);
+        // ìƒì„±í•œ ì—ë„ˆë¯¸ ê´€ë¦¬ë¥¼ ìœ„í•´ Setì— ì €ì¥
+        enemySet.Add(enemyScript);
 
-            // »ı¼º À§Ä¡ ¼³Á¤
-            enemyScript.transform.position = spawnPosition.position;
-            
-            // »óÅÂ ÃÊ±âÈ­
-            enemyScript.StatusReset();
+        // íƒ€ê²Ÿ ìœ„ì¹˜ ì„¤ì •
+        enemyScript.SetTargetPosition(targetPosition);
 
-            // Enemy µµÂø ÀÌº¥Æ® µî·Ï (OnEnemyReachedTarget ¸Ş¼­µå¸¦ È£ÃâÇÏµµ·Ï ¼³Á¤)
-            StartCoroutine(CheckEnemyReachedTarget(enemyScript, enemyScript.gameObject));
-        }
-        else
-        {
-            Debug.LogError("»ı¼ºµÈ Àû¿¡ Enemy ½ºÅ©¸³Æ®°¡ ¾ø½À´Ï´Ù!");
-        }
+        // ìƒì„± ìœ„ì¹˜ ì„¤ì •
+        enemyScript.transform.position = spawnPosition.position;
+
+        // ìƒíƒœ ì´ˆê¸°í™”
+        enemyScript.StatusReset();
+
+        // Enemy ë„ì°© ì´ë²¤íŠ¸ ë“±ë¡ (OnEnemyReachedTarget ë©”ì„œë“œë¥¼ í˜¸ì¶œí•˜ë„ë¡ ì„¤ì •)
+        StartCoroutine(CheckEnemyReachedTarget(enemyScript, enemyScript.gameObject));
     }
 
-    // ÀûÀÌ ¸ñÇ¥¿¡ µµ´ŞÇß´ÂÁö È®ÀÎÇÏ´Â ÄÚ·çÆ¾
+    // ì ì´ ëª©í‘œì— ë„ë‹¬í–ˆëŠ”ì§€ í™•ì¸í•˜ëŠ” ì½”ë£¨í‹´
     private IEnumerator CheckEnemyReachedTarget(Enemy enemy, GameObject enemyObject)
     {
-        // ÀûÀÌ »ì¾ÆÀÖ°í, ¸ñÇ¥ À§Ä¡¿Í °Å¸®°¡ °¡±î¿öÁú ¶§±îÁö ´ë±â
+        // ì ì´ ì‚´ì•„ìˆê³ , ëª©í‘œ ìœ„ì¹˜ì™€ ê±°ë¦¬ê°€ ê°€ê¹Œì›Œì§ˆ ë•Œê¹Œì§€ ëŒ€ê¸°
         while (enemy.IsAlive() && Vector3.Distance(enemyObject.transform.position, targetPosition.position) > 0.1f)
         {
-            yield return null; // ´ÙÀ½ ÇÁ·¹ÀÓ±îÁö ´ë±â
+            yield return null; // ë‹¤ìŒ í”„ë ˆì„ê¹Œì§€ ëŒ€ê¸°
         }
 
-        // ÀûÀÌ ¾ÆÁ÷ »ì¾ÆÀÖ°í ¸ñÇ¥¿¡ µµ´ŞÇß´Ù¸é
+        // ì ì´ ì•„ì§ ì‚´ì•„ìˆê³  ëª©í‘œì— ë„ë‹¬í–ˆë‹¤ë©´
         if (enemy.IsAlive())
         {
-            // ÇÃ·¹ÀÌ¾î »ı¸í·Â °¨¼Ò
+            // í”Œë ˆì´ì–´ ìƒëª…ë ¥ ê°ì†Œ
             DecreasePlayerLifePoint();
 
-            // Àû ºñÈ°¼ºÈ­ (Enemy ½ºÅ©¸³Æ®ÀÇ Dead ¸Ş¼­µå´Â privateÀÌ¹Ç·Î Á÷Á¢ È£ÃâÇÒ ¼ö ¾øÀ½)
+            // ì  ë¹„í™œì„±í™” (Enemy ìŠ¤í¬ë¦½íŠ¸ì˜ Dead ë©”ì„œë“œëŠ” privateì´ë¯€ë¡œ ì§ì ‘ í˜¸ì¶œí•  ìˆ˜ ì—†ìŒ)
             enemyObject.SetActive(false);
         }
     }
 
-    // ÇÃ·¹ÀÌ¾î »ı¸í·Â °¨¼Ò
+    // í”Œë ˆì´ì–´ ìƒëª…ë ¥ ê°ì†Œ
     private void DecreasePlayerLifePoint()
     {
         playerLifePoint--;
-        Debug.Log($"ÇÃ·¹ÀÌ¾î »ı¸í·ÂÀÌ °¨¼ÒÇß½À´Ï´Ù. ³²Àº »ı¸í·Â: {playerLifePoint}");
+        Debug.Log($"í”Œë ˆì´ì–´ ìƒëª…ë ¥ì´ ê°ì†Œí–ˆìŠµë‹ˆë‹¤. ë‚¨ì€ ìƒëª…ë ¥: {playerLifePoint}");
 
-        // UI ¾÷µ¥ÀÌÆ®
+        // UI ì—…ë°ì´íŠ¸
         UpdateLifePointUI();
 
-        // »ı¸í·ÂÀÌ 0ÀÌ µÇ¸é °ÔÀÓ Á¾·á
+        // ìƒëª…ë ¥ì´ 0ì´ ë˜ë©´ ê²Œì„ ì¢…ë£Œ
         if (playerLifePoint <= 0)
         {
             GameOver();
         }
     }
 
-    // UI ¾÷µ¥ÀÌÆ®
+    // UI ì—…ë°ì´íŠ¸
     private void UpdateLifePointUI()
     {
         if (lifePointText != null)
@@ -161,39 +159,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // °ÔÀÓ Á¾·á
+    // ê²Œì„ ì¢…ë£Œ
     private void GameOver()
     {
         gameActive = false;
-        Debug.Log("°ÔÀÓ ¿À¹ö!");
+        Debug.Log("ê²Œì„ ì˜¤ë²„!");
 
-        // ¸ğµç Àû ºñÈ°¼ºÈ­ (¼±ÅÃÀû)
-        Enemy[] allEnemies = FindObjectsOfType<Enemy>();
-        foreach (Enemy enemy in allEnemies)
+        // ëª¨ë“  ì  ë¹„í™œì„±í™”
+        foreach (Enemy enemy in enemySet)
         {
             enemy.Damaged(enemy.GetHp());
         }
 
-        // °ÔÀÓ ¿À¹ö UI Ç¥½Ã µî Ãß°¡ ±â´É ±¸Çö (ÇÊ¿ä½Ã)
+        // ê²Œì„ ì˜¤ë²„ UI í‘œì‹œ ë“± ì¶”ê°€ ê¸°ëŠ¥ êµ¬í˜„ (í•„ìš”ì‹œ)
     }
 
-    // °ÔÀÓ Àç½ÃÀÛ (ÇÊ¿ä½Ã)
+    // ê²Œì„ ì¬ì‹œì‘ (í•„ìš”ì‹œ)
     public void RestartGame()
     {
         playerLifePoint = 3;
         gameActive = true;
         UpdateLifePointUI();
 
-        // ±âÁ¸ Àû Á¤¸®
-        Enemy[] allEnemies = FindObjectsOfType<Enemy>();
-        foreach (Enemy enemy in allEnemies)
+        // ê¸°ì¡´ ì  ì •ë¦¬
+        foreach (Enemy enemy in enemySet)
         {
             Destroy(enemy.gameObject);
         }
 
-        // Àû ¼ÒÈ¯ ÄÚ·çÆ¾ Àç½ÃÀÛ
+        // ì  ì†Œí™˜ ì½”ë£¨í‹´ ì¬ì‹œì‘
         StartCoroutine(SpawnEnemyRoutine());
 
-        Debug.Log("°ÔÀÓÀ» Àç½ÃÀÛÇÕ´Ï´Ù.");
+        Debug.Log("ê²Œì„ì„ ì¬ì‹œì‘í•©ë‹ˆë‹¤.");
     }
 }

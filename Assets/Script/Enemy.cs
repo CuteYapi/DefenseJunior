@@ -1,60 +1,60 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    // HP °ª
+    // HP ê°’
     [SerializeField] private float hp;
     [SerializeField] private float maxHp;
 
-    // Inspector¿¡¼­ ÇÒ´çÇÒ ¸ñÇ¥ À§Ä¡ÀÇ Transform
+    // Inspectorì—ì„œ í• ë‹¹í•  ëª©í‘œ ìœ„ì¹˜ì˜ Transform
     [SerializeField] private Transform targetPosition;
 
-    // Inspector¿¡¼­ ¼öÁ¤ °¡´ÉÇÑ ÀÌµ¿ ¼Óµµ
+    // Inspectorì—ì„œ ìˆ˜ì • ê°€ëŠ¥í•œ ì´ë™ ì†ë„
     [SerializeField] private float moveSpeed = 5f;
 
-    // ÀÌµ¿ÀÌ ¿Ï·áµÇ¾ú´ÂÁö Ã¼Å©ÇÏ´Â ÇÃ·¡±×
+    // ì´ë™ì´ ì™„ë£Œë˜ì—ˆëŠ”ì§€ ì²´í¬í•˜ëŠ” í”Œë˜ê·¸
     private bool isMoving = false;
 
-    // »ì¾ÆÀÖ´ÂÁö Ã¼Å©ÇÏ´Â ÇÃ·¡±×
+    // ì‚´ì•„ìˆëŠ”ì§€ ì²´í¬í•˜ëŠ” í”Œë˜ê·¸
     private bool isAlive = true;
 
-    // Start´Â ÃÖÃÊ »ı¼º ½Ã È£ÃâµË´Ï´Ù
+    // StartëŠ” ìµœì´ˆ ìƒì„± ì‹œ í˜¸ì¶œë©ë‹ˆë‹¤
     void Start()
     {
-        // targetPositionÀÌ ¼³Á¤µÇ¾î ÀÖ´ÂÁö È®ÀÎ
+        // targetPositionì´ ì„¤ì •ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸
         if (targetPosition != null)
         {
-            // ÀÌµ¿ ½ÃÀÛ
+            // ì´ë™ ì‹œì‘
             StatusReset();
         }
         else
         {
-            Debug.LogWarning("Target PositionÀÌ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("Target Positionì´ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
-    // Update´Â ¸Å ÇÁ·¹ÀÓ¸¶´Ù È£ÃâµË´Ï´Ù
+    // UpdateëŠ” ë§¤ í”„ë ˆì„ë§ˆë‹¤ í˜¸ì¶œë©ë‹ˆë‹¤
     void Update()
     {
-        // »ì¾ÆÀÖÀ» ¶§¸¸ ÀÌµ¿
+        // ì‚´ì•„ìˆì„ ë•Œë§Œ ì´ë™
         if (isAlive && isMoving && targetPosition != null)
         {
-            // ÇöÀç À§Ä¡¿¡¼­ ¸ñÇ¥ À§Ä¡·Î ÀÌµ¿
+            // í˜„ì¬ ìœ„ì¹˜ì—ì„œ ëª©í‘œ ìœ„ì¹˜ë¡œ ì´ë™
             transform.position = Vector3.MoveTowards(
                 transform.position,
                 targetPosition.position,
                 moveSpeed * Time.deltaTime
             );
 
-            // ¸ñÇ¥ À§Ä¡¿¡ µµ´ŞÇß´ÂÁö È®ÀÎ
+            // ëª©í‘œ ìœ„ì¹˜ì— ë„ë‹¬í–ˆëŠ”ì§€ í™•ì¸
             if (Vector3.Distance(transform.position, targetPosition.position) < 0.001f)
             {
-                // Á¤È®ÇÑ À§Ä¡¿¡ ¹èÄ¡
+                // ì •í™•í•œ ìœ„ì¹˜ì— ë°°ì¹˜
                 transform.position = targetPosition.position;
                 isMoving = false;
 
-                // µµÂøÇßÀ½À» ¾Ë¸²
-                Debug.Log($"{gameObject.name}°¡ ¸ñÇ¥ À§Ä¡¿¡ µµÂøÇß½À´Ï´Ù.");
+                // ë„ì°©í–ˆìŒì„ ì•Œë¦¼
+                Debug.Log($"{gameObject.name}ê°€ ëª©í‘œ ìœ„ì¹˜ì— ë„ì°©í–ˆìŠµë‹ˆë‹¤.");
             }
         }
     }
@@ -66,24 +66,24 @@ public class Enemy : MonoBehaviour
         isAlive = true;
         isMoving = true;
 
-        Debug.Log($"{gameObject.name}ÀÌ(°¡) ÃÊ±âÈ­µÆ½À´Ï´Ù.");
+        Debug.Log($"{gameObject.name}ì´(ê°€) ì´ˆê¸°í™”ëìŠµë‹ˆë‹¤.");
 
-        // °ÔÀÓ ¿ÀºêÁ§Æ® È°¼ºÈ­
+        // ê²Œì„ ì˜¤ë¸Œì íŠ¸ í™œì„±í™”
         gameObject.SetActive(true);
     }
 
-    // µ¥¹ÌÁö¸¦ ¹Ş´Â ÇÔ¼ö
+    // ë°ë¯¸ì§€ë¥¼ ë°›ëŠ” í•¨ìˆ˜
     public void Damaged(float damage)
     {
-        // ÀÌ¹Ì Á×¾ú´Ù¸é µ¥¹ÌÁö¸¦ ¹ŞÁö ¾ÊÀ½
+        // ì´ë¯¸ ì£½ì—ˆë‹¤ë©´ ë°ë¯¸ì§€ë¥¼ ë°›ì§€ ì•ŠìŒ
         if (!isAlive) return;
 
-        // HP °¨¼Ò
+        // HP ê°ì†Œ
         hp -= damage; // hp = hp - damaged;
 
-        Debug.Log($"{gameObject.name}ÀÌ(°¡) {damage}ÀÇ µ¥¹ÌÁö¸¦ ¹Ş¾Ò½À´Ï´Ù. ³²Àº HP: {hp}");
+        Debug.Log($"{gameObject.name}ì´(ê°€) {damage}ì˜ ë°ë¯¸ì§€ë¥¼ ë°›ì•˜ìŠµë‹ˆë‹¤. ë‚¨ì€ HP: {hp}");
 
-        // HP°¡ 0 ÀÌÇÏ°¡ µÇ¸é Dead ÇÔ¼ö È£Ãâ
+        // HPê°€ 0 ì´í•˜ê°€ ë˜ë©´ Dead í•¨ìˆ˜ í˜¸ì¶œ
         if (hp <= 0)
         {
             hp = 0;
@@ -91,19 +91,19 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // »ç¸Á Ã³¸® ÇÔ¼ö
+    // ì‚¬ë§ ì²˜ë¦¬ í•¨ìˆ˜
     private void Dead()
     {
         isAlive = false;
         isMoving = false;
 
-        Debug.Log($"{gameObject.name}ÀÌ(°¡) »ç¸ÁÇß½À´Ï´Ù.");
+        Debug.Log($"{gameObject.name}ì´(ê°€) ì‚¬ë§í–ˆìŠµë‹ˆë‹¤.");
 
-        // °ÔÀÓ ¿ÀºêÁ§Æ® ºñÈ°¼ºÈ­
+        // ê²Œì„ ì˜¤ë¸Œì íŠ¸ ë¹„í™œì„±í™”
         gameObject.SetActive(false);
     }
 
-    // ·±Å¸ÀÓ Áß¿¡ ¸ñÇ¥ À§Ä¡¸¦ º¯°æÇÏ±â À§ÇÑ ¸Ş¼­µå
+    // ëŸ°íƒ€ì„ ì¤‘ì— ëª©í‘œ ìœ„ì¹˜ë¥¼ ë³€ê²½í•˜ê¸° ìœ„í•œ ë©”ì„œë“œ
     public void SetTargetPosition(Transform newTarget)
     {
         targetPosition = newTarget;
@@ -113,19 +113,19 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // ÀÌµ¿ ¼Óµµ¸¦ ·±Å¸ÀÓ Áß¿¡ º¯°æÇÏ±â À§ÇÑ ¸Ş¼­µå
+    // ì´ë™ ì†ë„ë¥¼ ëŸ°íƒ€ì„ ì¤‘ì— ë³€ê²½í•˜ê¸° ìœ„í•œ ë©”ì„œë“œ
     public void SetMoveSpeed(float newSpeed)
     {
         moveSpeed = newSpeed;
     }
 
-    // HP¸¦ ¹İÈ¯ÇÏ´Â ¸Ş¼­µå
+    // HPë¥¼ ë°˜í™˜í•˜ëŠ” ë©”ì„œë“œ
     public float GetHp()
     {
         return hp;
     }
 
-    // »ıÁ¸ ¿©ºÎ¸¦ ¹İÈ¯ÇÏ´Â ¸Ş¼­µå
+    // ìƒì¡´ ì—¬ë¶€ë¥¼ ë°˜í™˜í•˜ëŠ” ë©”ì„œë“œ
     public bool IsAlive()
     {
         return isAlive;

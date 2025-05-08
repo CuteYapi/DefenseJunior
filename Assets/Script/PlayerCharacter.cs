@@ -6,24 +6,27 @@ public class PlayerCharacter : MonoBehaviour
 {
     [Header("Detection Settings")]
     [SerializeField] private float detectionRadius = 5f;
-    [SerializeField] private LayerMask targetLayer;  // Inspector¿¡¼­ °ø°İÇÒ ´ë»óÀÇ ·¹ÀÌ¾î¸¦ ¼³Á¤
-    [SerializeField] private Color gizmoColor = Color.red;  // Gizmo »ö»ó
+    [SerializeField] private LayerMask targetLayer;  // Inspectorì—ì„œ ê³µê²©í•  ëŒ€ìƒì˜ ë ˆì´ì–´ë¥¼ ì„¤ì •
+    [SerializeField] private Color gizmoColor = Color.red;  // Gizmo ìƒ‰ìƒ
 
     [Header("Attack Settings")]
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float attackCooldown = 1f;
-    [SerializeField] private float attackFXDuration = 1f; // ÀÌÆåÆ® Áö¼Ó ½Ã°£
-    [SerializeField] private int attackFXType; // ÀÌÆåÆ® Á¾·ù
-
-    [Header("Manager")]
-    [SerializeField] private PoolManager pool;
+    [SerializeField] private float attackFXDuration = 1f; // ì´í™íŠ¸ ì§€ì† ì‹œê°„
+    [SerializeField] private int attackFXType; // ì´í™íŠ¸ ì¢…ë¥˜
 
     private GameObject currentTarget;
     private float nextAttackTime;
 
+    public void Initialize(Vector3 spawnPosition)
+    {
+        gameObject.SetActive(true);
+        transform.position = spawnPosition;
+    }
+
     private void Update()
     {
-        // ÇöÀç Å¸°ÙÀÌ ¾ø°Å³ª, Á×¾ú°Å³ª, ¹üÀ§¸¦ ¹ş¾î³­ °æ¿ì »õ·Î¿î Å¸°Ù Ã£±â
+        // í˜„ì¬ íƒ€ê²Ÿì´ ì—†ê±°ë‚˜, ì£½ì—ˆê±°ë‚˜, ë²”ìœ„ë¥¼ ë²—ì–´ë‚œ ê²½ìš° ìƒˆë¡œìš´ íƒ€ê²Ÿ ì°¾ê¸°
         if (currentTarget == null ||
             !IsTargetAlive(currentTarget) ||
             !IsTargetInRange(currentTarget))
@@ -31,7 +34,7 @@ public class PlayerCharacter : MonoBehaviour
             FindNewTarget();
         }
 
-        // Å¸°ÙÀÌ ÀÖ°í °ø°İ °¡´ÉÇÑ °æ¿ì °ø°İ
+        // íƒ€ê²Ÿì´ ìˆê³  ê³µê²© ê°€ëŠ¥í•œ ê²½ìš° ê³µê²©
         if (currentTarget != null && Time.time >= nextAttackTime)
         {
             AttackTarget();
@@ -39,7 +42,7 @@ public class PlayerCharacter : MonoBehaviour
         }
     }
 
-    // Å¸°ÙÀÌ °ø°İ ¹üÀ§ ³»¿¡ ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼ö
+    // íƒ€ê²Ÿì´ ê³µê²© ë²”ìœ„ ë‚´ì— ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í•¨ìˆ˜
     private bool IsTargetInRange(GameObject target)
     {
         if (target == null) return false;
@@ -58,19 +61,19 @@ public class PlayerCharacter : MonoBehaviour
         {
             GameObject target = collider.gameObject;
 
-            // ÀÚ±â ÀÚ½ÅÀº Á¦¿Ü
+            // ìê¸° ìì‹ ì€ ì œì™¸
             if (target == gameObject)
             {
                 continue;
             }
 
-            // Å¸°ÙÀÌ »ì¾ÆÀÖ´ÂÁö È®ÀÎ
+            // íƒ€ê²Ÿì´ ì‚´ì•„ìˆëŠ”ì§€ í™•ì¸
             if (!IsTargetAlive(target))
             {
                 continue;
             }
 
-            // °¡Àå °¡±î¿î Å¸°Ù ¼±ÅÃ
+            // ê°€ì¥ ê°€ê¹Œìš´ íƒ€ê²Ÿ ì„ íƒ
             float distance = Vector3.Distance(transform.position, target.transform.position);
             if (distance < closestDistance)
             {
@@ -82,7 +85,7 @@ public class PlayerCharacter : MonoBehaviour
 
     private bool IsTargetAlive(GameObject target)
     {
-        // Å¸°ÙÀÇ Enemy ÄÄÆ÷³ÍÆ®¸¦ È®ÀÎ
+        // íƒ€ê²Ÿì˜ Enemy ì»´í¬ë„ŒíŠ¸ë¥¼ í™•ì¸
         var enemy = target.GetComponent<Enemy>();
         return enemy != null && enemy.IsAlive();
     }
@@ -96,10 +99,10 @@ public class PlayerCharacter : MonoBehaviour
         {
             enemy.Damaged(attackDamage);
 
-            // °ø°İ ÀÌÆåÆ® »ı¼º
+            // ê³µê²© ì´í™íŠ¸ ìƒì„±
             SpawnAttackFX(currentTarget.transform.position);
 
-            // °ø°İ ÈÄ Å¸°ÙÀÌ Á×¾ú´ÂÁö È®ÀÎ
+            // ê³µê²© í›„ íƒ€ê²Ÿì´ ì£½ì—ˆëŠ”ì§€ í™•ì¸
             if (!enemy.IsAlive())
             {
                 currentTarget = null;
@@ -107,43 +110,43 @@ public class PlayerCharacter : MonoBehaviour
         }
     }
 
-    // °ø°İ ÀÌÆåÆ®¸¦ »ı¼ºÇÏ´Â ÇÔ¼ö
+    // ê³µê²© ì´í™íŠ¸ë¥¼ ìƒì„±í•˜ëŠ” í•¨ìˆ˜
     private void SpawnAttackFX(Vector3 position)
     {
-        // ÀÌÆåÆ® °¡Á®¿À±â => ¾î¶² ÀÌÆåÆ®¸¦ °¡Á®¿ÃÁö ±¸ºĞÇÏ±â
+        // ì´í™íŠ¸ ê°€ì ¸ì˜¤ê¸° => ì–´ë–¤ ì´í™íŠ¸ë¥¼ ê°€ì ¸ì˜¬ì§€ êµ¬ë¶„í•˜ê¸°
         ParticleSystem targetFx = null;
         switch (attackFXType)
         {
             case 1:
                 {
-                    targetFx = pool.GetFx();
+                    targetFx = PoolManager.Pool.GetFx();
                 }
                 break;
             case 2:
                 {
-                    targetFx = pool.GetFx_1();
+                    targetFx = PoolManager.Pool.GetFx_1();
                 }
                 break;
             case 3:
                 {
-                    targetFx = pool.GetFx_2();
+                    targetFx = PoolManager.Pool.GetFx_2();
                 }
                 break;
             default:
-                Debug.LogError("¿Ã¹Ù¸£Áö ¾Ê´Â ÀÌÆåÆ® Å¸ÀÔÀÌ ÀÔ·ÂµÇ¾ú½À´Ï´Ù!");
+                Debug.LogError($"ì˜¬ë°”ë¥´ì§€ ì•ŠëŠ” ì´í™íŠ¸ íƒ€ì…ì´ ì…ë ¥ë˜ì—ˆìŠµë‹ˆë‹¤! :{attackFXType}");
                 goto case 1;
         }
 
-        // 1. ÀÌÆåÆ®¸¦ ´ë»ó À§Ä¡¿¡ ÀÌÆåÆ®¸¦ ¿Å±â°í Àç»ıÇÏ±â
+        // 1. ì´í™íŠ¸ë¥¼ ëŒ€ìƒ ìœ„ì¹˜ì— ì´í™íŠ¸ë¥¼ ì˜®ê¸°ê³  ì¬ìƒí•˜ê¸°
         targetFx.transform.position = position;
         targetFx.gameObject.SetActive(true);
         targetFx.Play();
 
-        // 2. ÀÌÆåÆ® Àç»ıÀÌ ³¡³ª¸é Á¦°ÅÇÏ±â
+        // 2. ì´í™íŠ¸ ì¬ìƒì´ ëë‚˜ë©´ ì œê±°í•˜ê¸°
         StartCoroutine(SetOffFx(targetFx));
     }
 
-    // ÀÏÁ¤ ½Ã°£ µÚ ÀÌÆåÆ® Á¦°ÅÇÏ±â
+    // ì¼ì • ì‹œê°„ ë’¤ ì´í™íŠ¸ ì œê±°í•˜ê¸°
     private IEnumerator SetOffFx(ParticleSystem Fx)
     {
         yield return new WaitForSeconds(attackFXDuration);
@@ -152,18 +155,18 @@ public class PlayerCharacter : MonoBehaviour
     }
 
 
-    // µğ¹ö±×¿ëÀ¸·Î °¨Áö ¹üÀ§¸¦ ¿¡µğÅÍ¿¡¼­ ½Ã°¢È­
+    // ë””ë²„ê·¸ìš©ìœ¼ë¡œ ê°ì§€ ë²”ìœ„ë¥¼ ì—ë””í„°ì—ì„œ ì‹œê°í™”
     private void OnDrawGizmos()
     {
-        // Ç×»ó ¹üÀ§¸¦ Ç¥½Ã (¼±ÅÃÇÏÁö ¾Ê¾Æµµ)
+        // í•­ìƒ ë²”ìœ„ë¥¼ í‘œì‹œ (ì„ íƒí•˜ì§€ ì•Šì•„ë„)
         Gizmos.color = gizmoColor;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
-        // ¼±À» ´õ Àß º¸ÀÌ°Ô ÇÏ±â À§ÇØ ºÒÅõ¸íµµ ³ôÀº »ö»óÀ¸·Î ¼±À» ±×¸²
+        // ì„ ì„ ë” ì˜ ë³´ì´ê²Œ í•˜ê¸° ìœ„í•´ ë¶ˆíˆ¬ëª…ë„ ë†’ì€ ìƒ‰ìƒìœ¼ë¡œ ì„ ì„ ê·¸ë¦¼
         Gizmos.color = new Color(gizmoColor.r, gizmoColor.g, gizmoColor.b, 1f);
         DrawCircle(transform.position, detectionRadius, 32);
 
-        // ÇöÀç Å¸°ÙÀÌ ÀÖÀ¸¸é Å¸°ÙÀ¸·Î ¼±À» ±×¸²
+        // í˜„ì¬ íƒ€ê²Ÿì´ ìˆìœ¼ë©´ íƒ€ê²Ÿìœ¼ë¡œ ì„ ì„ ê·¸ë¦¼
         if (currentTarget != null)
         {
             Gizmos.color = Color.yellow;
@@ -171,7 +174,7 @@ public class PlayerCharacter : MonoBehaviour
         }
     }
 
-    // ¿øÇü ¹üÀ§¸¦ ´õ ¸íÈ®ÇÏ°Ô Ç¥½ÃÇÏ±â À§ÇÑ ÇïÆÛ ¸Ş¼­µå
+    // ì›í˜• ë²”ìœ„ë¥¼ ë” ëª…í™•í•˜ê²Œ í‘œì‹œí•˜ê¸° ìœ„í•œ í—¬í¼ ë©”ì„œë“œ
     private void DrawCircle(Vector3 center, float radius, int segments)
     {
         float angle = 0f;

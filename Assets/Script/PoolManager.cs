@@ -4,6 +4,48 @@ using System.Linq;
 
 public class PoolManager : MonoBehaviour
 {
+    #region Singleton
+
+    public static PoolManager Pool { get; private set; }
+
+    private void Awake()
+    {
+        Pool = this;
+    }
+
+    #endregion
+
+    #region PlayerCharacter Pool
+
+    public List<PlayerCharacter> RefPlayerCharacterList = new List<PlayerCharacter>();
+    public Dictionary<PlayerCharacterType, List<PlayerCharacter>> PlayerCharacterPool = new Dictionary<PlayerCharacterType, List<PlayerCharacter>>();
+
+    public PlayerCharacter GetPlayerCharacter(PlayerCharacterType type)
+    {
+        // 1. í’€ì— ë¦¬ìŠ¤íŠ¸ ìì²´ê°€ ì—†ëŠ” ê²½ìš° ë¦¬ìŠ¤íŠ¸ë¥¼ ìƒì„±
+        if (PlayerCharacterPool.TryGetValue(type, out List<PlayerCharacter> targetList) == false)
+        {
+            targetList = new List<PlayerCharacter>();
+            PlayerCharacterPool.Add(type, targetList);
+        }
+
+        // 2. í’€ì—ì„œ ì‚¬ìš© ê°€ëŠ¥ ì˜¤ë¸Œì íŠ¸ ê²€ìƒ‰
+        PlayerCharacter target = targetList.FirstOrDefault(playerCharacter => playerCharacter.gameObject.activeSelf == false);
+
+        // 3. ì—†ì„ ê²½ìš° ìƒˆë¡­ê²Œ ìƒì„± í›„ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
+        if (target == null)
+        {
+            target = Instantiate(RefPlayerCharacterList[(int)type], transform);
+            target.name = $"{type}_{targetList.Count}";
+            targetList.Add(target);
+        }
+
+        // 4. ìµœì¢… ë°˜í™˜
+        return target;
+    }
+
+    #endregion
+
     #region Enemy Pool
 
     public Enemy RefEnemy;
@@ -11,11 +53,11 @@ public class PoolManager : MonoBehaviour
 
     public Enemy GetEnemy()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         Enemy targetEnemy = EnemyPool.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
 
-        #region 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
-        // 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        #region 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
+        // 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
         //Enemy targetEnemy = null; // (=default)
         //foreach(Enemy item in EnemyPool)
         //{
@@ -27,16 +69,16 @@ public class PoolManager : MonoBehaviour
         //}
         #endregion
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Enemy°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ì—†ì„ ê²½ìš°
         if (targetEnemy == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             Enemy newEnemy = Instantiate(RefEnemy);
             EnemyPool.Add(newEnemy);
 
             return newEnemy;
         }
-        // 2-2. »ç¿ë °¡´ÉÇÑ Enemy°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ìˆì„ ê²½ìš°
         else // targetEnemy != default
         {
             return targetEnemy;
@@ -48,10 +90,10 @@ public class PoolManager : MonoBehaviour
 
     public Enemy GetEnemy_1()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         //Enemy targetEnemy = EnemyPool_1.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
 
-        #region 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        #region 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
         Enemy targetEnemy = null;
         foreach (Enemy enemy in EnemyPool_1)
         {
@@ -63,17 +105,17 @@ public class PoolManager : MonoBehaviour
         }
         #endregion
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Enemy°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ì—†ì„ ê²½ìš°
         if (targetEnemy == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             Enemy newEnemy = Instantiate(RefEnemy_1);
             EnemyPool_1.Add(newEnemy);
 
             return newEnemy;
         }
 
-        // 2-2. »ç¿ë °¡´ÉÇÑ Enemy°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ìˆì„ ê²½ìš°
         return targetEnemy;
     }
 
@@ -82,24 +124,24 @@ public class PoolManager : MonoBehaviour
 
     public Enemy GetEnemy_2()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         Enemy targetEnemy = EnemyPool_2.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
 
-        #region 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        #region 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
 
         #endregion
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Enemy°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ì—†ì„ ê²½ìš°
         if (targetEnemy == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             Enemy newEnemy = Instantiate(RefEnemy_2);
             EnemyPool_2.Add(newEnemy);
 
             return newEnemy;
         }
 
-        // 2-2. »ç¿ë °¡´ÉÇÑ Enemy°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Enemyê°€ ìˆì„ ê²½ìš°
         return targetEnemy;
     }
 
@@ -111,22 +153,22 @@ public class PoolManager : MonoBehaviour
     public List<ParticleSystem> FxPool = new List<ParticleSystem>();
     public ParticleSystem GetFx()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         ParticleSystem targetFx = FxPool.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
 
-        // 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        // 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
        
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Fx°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ì—†ì„ ê²½ìš°
         if (targetFx == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             ParticleSystem newFx = Instantiate(RefFx);
             FxPool.Add(newFx);
 
             return newFx;
         }
-        // 2-2. »ç¿ë °¡´ÉÇÑ Fx°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ìˆì„ ê²½ìš°
         else // targetEnemy != default
         {
             return targetFx;
@@ -138,10 +180,10 @@ public class PoolManager : MonoBehaviour
     public List<ParticleSystem> FxPool_1 = new List<ParticleSystem>();
     public ParticleSystem GetFx_1()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         //ParticleSystem targetFx = FxPool_1.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
 
-        // 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        // 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
         ParticleSystem targetFx = null; // (=default)
         foreach (ParticleSystem fx in FxPool_1)
         {
@@ -152,16 +194,16 @@ public class PoolManager : MonoBehaviour
             }
         }
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Fx°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ì—†ì„ ê²½ìš°
         if (targetFx == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             ParticleSystem newFx = Instantiate(RefFx_1);
             FxPool_1.Add(newFx);
 
             return newFx;
         }
-        // 2-2. »ç¿ë °¡´ÉÇÑ Fx°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ìˆì„ ê²½ìš°
         else // targetEnemy != default
         {
             return targetFx;
@@ -173,22 +215,22 @@ public class PoolManager : MonoBehaviour
     public List<ParticleSystem> FxPool_2 = new List<ParticleSystem>();
     public ParticleSystem GetFx_2()
     {
-        // 1. Ç®¿¡ »ç¿ë °¡´ÉÇÑ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö Ã£±â
+        // 1. í’€ì— ì‚¬ìš© ê°€ëŠ¥í•œ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì°¾ê¸°
         ParticleSystem targetFx = FxPool_2.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
 
-        // 1.¿¡ ´ëÇÑ ´Ù¸¥ ¹æ¹ı
+        // 1.ì— ëŒ€í•œ ë‹¤ë¥¸ ë°©ë²•
 
 
-        // 2-1. »ç¿ë °¡´ÉÇÑ Fx°¡ ¾øÀ» °æ¿ì
+        // 2-1. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ì—†ì„ ê²½ìš°
         if (targetFx == default) //(== null)
         {
-            // »õ·Î¿î °É ¸¸µé¾î¼­ »ç¿ë °¡´ÉÇÏ°Ô ÇÏ±â
+            // ìƒˆë¡œìš´ ê±¸ ë§Œë“¤ì–´ì„œ ì‚¬ìš© ê°€ëŠ¥í•˜ê²Œ í•˜ê¸°
             ParticleSystem newFx = Instantiate(RefFx_2);
             FxPool_2.Add(newFx);
 
             return newFx;
         }
-        // 2-2. »ç¿ë °¡´ÉÇÑ Fx°¡ ÀÖÀ» °æ¿ì
+        // 2-2. ì‚¬ìš© ê°€ëŠ¥í•œ Fxê°€ ìˆì„ ê²½ìš°
         else // targetEnemy != default
         {
             return targetFx;
