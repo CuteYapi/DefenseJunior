@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f8877fde93ccd14aa2f4c3cd967d8c7, type: 3}
   m_Name: StageData_2
   m_EditorClassIdentifier: 
-  Type: 2
+  Type: 1
   Count: 7

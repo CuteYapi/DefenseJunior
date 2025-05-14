@@ -48,100 +48,30 @@ public class PoolManager : MonoBehaviour
 
     #region Enemy Pool
 
-    public Enemy RefEnemy;
-    public List<Enemy> EnemyPool = new List<Enemy>();
+    public List<Enemy> RefEnemyList = new List<Enemy>(); // 각 타입별 참조용 Enemy 프리팹 리스트
+    public Dictionary<EnemyType, List<Enemy>> EnemyPool = new Dictionary<EnemyType, List<Enemy>>();
 
-    public Enemy GetEnemy()
+    public Enemy GetEnemy(EnemyType type)
     {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        Enemy targetEnemy = EnemyPool.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
-
-        #region 1.에 대한 다른 방법
-        // 1.에 대한 다른 방법
-        //Enemy targetEnemy = null; // (=default)
-        //foreach(Enemy item in EnemyPool)
-        //{
-        //    if(item.gameObject.activeSelf == false)
-        //    {
-        //        targetEnemy = item;
-        //        break;
-        //    }
-        //}
-        #endregion
-
-        // 2-1. 사용 가능한 Enemy가 없을 경우
-        if (targetEnemy == default) //(== null)
+        // 1. 풀에 리스트 자체가 없는 경우 리스트를 생성
+        if (EnemyPool.TryGetValue(type, out List<Enemy> targetList) == false)
         {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            Enemy newEnemy = Instantiate(RefEnemy);
-            EnemyPool.Add(newEnemy);
-
-            return newEnemy;
-        }
-        // 2-2. 사용 가능한 Enemy가 있을 경우
-        else // targetEnemy != default
-        {
-            return targetEnemy;
-        }
-    }
-
-    public Enemy RefEnemy_1;
-    public List<Enemy> EnemyPool_1 = new List<Enemy>();
-
-    public Enemy GetEnemy_1()
-    {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        //Enemy targetEnemy = EnemyPool_1.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
-
-        #region 1.에 대한 다른 방법
-        Enemy targetEnemy = null;
-        foreach (Enemy enemy in EnemyPool_1)
-        {
-            if (enemy.gameObject.activeSelf == false)
-            {
-                targetEnemy = enemy;
-                break;
-            }
-        }
-        #endregion
-
-        // 2-1. 사용 가능한 Enemy가 없을 경우
-        if (targetEnemy == default) //(== null)
-        {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            Enemy newEnemy = Instantiate(RefEnemy_1);
-            EnemyPool_1.Add(newEnemy);
-
-            return newEnemy;
+            targetList = new List<Enemy>();
+            EnemyPool.Add(type, targetList);
         }
 
-        // 2-2. 사용 가능한 Enemy가 있을 경우
-        return targetEnemy;
-    }
+        // 2. 풀에서 사용 가능 오브젝트 검색
+        Enemy targetEnemy = targetList.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
 
-    public Enemy RefEnemy_2;
-    public List<Enemy> EnemyPool_2 = new List<Enemy>();
-
-    public Enemy GetEnemy_2()
-    {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        Enemy targetEnemy = EnemyPool_2.FirstOrDefault(enemy => enemy.gameObject.activeSelf == false);
-
-        #region 1.에 대한 다른 방법
-
-        #endregion
-
-        // 2-1. 사용 가능한 Enemy가 없을 경우
-        if (targetEnemy == default) //(== null)
+        // 3. 없을 경우 새롭게 생성 후 리스트에 추가
+        if (targetEnemy == null)
         {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            Enemy newEnemy = Instantiate(RefEnemy_2);
-            EnemyPool_2.Add(newEnemy);
-
-            return newEnemy;
+            targetEnemy = Instantiate(RefEnemyList[(int)type], transform);
+            targetEnemy.name = $"{type}_{targetList.Count}";
+            targetList.Add(targetEnemy);
         }
 
-        // 2-2. 사용 가능한 Enemy가 있을 경우
+        // 4. 최종 반환
         return targetEnemy;
     }
 
@@ -149,92 +79,31 @@ public class PoolManager : MonoBehaviour
 
     #region Fx Pool
 
-    public ParticleSystem RefFx;
-    public List<ParticleSystem> FxPool = new List<ParticleSystem>();
-    public ParticleSystem GetFx()
+    public List<ParticleSystem> RefFxList = new List<ParticleSystem>(); // 각 타입별 참조용 Fx 프리팹 리스트
+    public Dictionary<FxType, List<ParticleSystem>> FxPool = new Dictionary<FxType, List<ParticleSystem>>();
+
+    public ParticleSystem GetFx(FxType type)
     {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        ParticleSystem targetFx = FxPool.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
-
-        // 1.에 대한 다른 방법
-       
-
-        // 2-1. 사용 가능한 Fx가 없을 경우
-        if (targetFx == default) //(== null)
+        // 1. 풀에 리스트 자체가 없는 경우 리스트를 생성
+        if (FxPool.TryGetValue(type, out List<ParticleSystem> targetList) == false)
         {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            ParticleSystem newFx = Instantiate(RefFx);
-            FxPool.Add(newFx);
-
-            return newFx;
-        }
-        // 2-2. 사용 가능한 Fx가 있을 경우
-        else // targetEnemy != default
-        {
-            return targetFx;
-        }
-    }
-
-
-    public ParticleSystem RefFx_1;
-    public List<ParticleSystem> FxPool_1 = new List<ParticleSystem>();
-    public ParticleSystem GetFx_1()
-    {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        //ParticleSystem targetFx = FxPool_1.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
-
-        // 1.에 대한 다른 방법
-        ParticleSystem targetFx = null; // (=default)
-        foreach (ParticleSystem fx in FxPool_1)
-        {
-            if (fx.gameObject.activeSelf == false)
-            {
-                targetFx = fx;
-                break;
-            }
+            targetList = new List<ParticleSystem>();
+            FxPool.Add(type, targetList);
         }
 
-        // 2-1. 사용 가능한 Fx가 없을 경우
-        if (targetFx == default) //(== null)
+        // 2. 풀에서 사용 가능 오브젝트 검색
+        ParticleSystem targetFx = targetList.FirstOrDefault(fx => fx.gameObject.activeSelf == false);
+
+        // 3. 없을 경우 새롭게 생성 후 리스트에 추가
+        if (targetFx == null)
         {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            ParticleSystem newFx = Instantiate(RefFx_1);
-            FxPool_1.Add(newFx);
-
-            return newFx;
+            targetFx = Instantiate(RefFxList[(int)type], transform);
+            targetFx.name = $"{type}_{targetList.Count}";
+            targetList.Add(targetFx);
         }
-        // 2-2. 사용 가능한 Fx가 있을 경우
-        else // targetEnemy != default
-        {
-            return targetFx;
-        }
-    }
 
-
-    public ParticleSystem RefFx_2;
-    public List<ParticleSystem> FxPool_2 = new List<ParticleSystem>();
-    public ParticleSystem GetFx_2()
-    {
-        // 1. 풀에 사용 가능한 오브젝트가 있는지 찾기
-        ParticleSystem targetFx = FxPool_2.FirstOrDefault(Fx => Fx.gameObject.activeSelf == false);
-
-        // 1.에 대한 다른 방법
-
-
-        // 2-1. 사용 가능한 Fx가 없을 경우
-        if (targetFx == default) //(== null)
-        {
-            // 새로운 걸 만들어서 사용 가능하게 하기
-            ParticleSystem newFx = Instantiate(RefFx_2);
-            FxPool_2.Add(newFx);
-
-            return newFx;
-        }
-        // 2-2. 사용 가능한 Fx가 있을 경우
-        else // targetEnemy != default
-        {
-            return targetFx;
-        }
+        // 4. 최종 반환
+        return targetFx;
     }
 
     #endregion

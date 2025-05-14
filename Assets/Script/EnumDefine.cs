@@ -1,3 +1,14 @@
+public enum EnemyType
+{
+    None = -1,
+
+    Slime = 0,
+    Goblin = 1,
+    Orc,
+
+    Max,
+}
+
 public enum PlayerCharacterType
 {
     None = -1,
@@ -8,6 +19,17 @@ public enum PlayerCharacterType
     Range_1,
     Range_2,
     Range_3,
+
+    Max,
+}
+
+public enum FxType
+{
+    None = -1,
+
+    Explosion,
+    Skull,
+    SwordSlash,
 
     Max,
 }

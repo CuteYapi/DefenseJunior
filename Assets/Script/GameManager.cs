@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +11,6 @@ public class GameManager : MonoBehaviour
 
     // 적 소환 관련 변수
     [Header("Enemy Spawn Settings")]
-    [SerializeField] private GameObject enemyPrefab; // 소환할 적 프리팹
     [SerializeField] private Transform spawnPosition; // 적 소환 위치
     [SerializeField] private Transform targetPosition; // 적의 목표 위치
     [SerializeField] private float spawnTime = 2f; // 적 소환 간격
@@ -26,6 +25,8 @@ public class GameManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private UnityEngine.UI.Text lifePointText; // 생명력 표시 텍스트
 
+    #region Singleton
+
     public static GameManager Game { get; private set; }
 
     private void Awake()
@@ -33,11 +34,13 @@ public class GameManager : MonoBehaviour
         Game = this;
     }
 
+    #endregion
+
     // 시작 시 호출
     private void Start()
     {
         // 초기 설정 확인
-        if (enemyPrefab == null || spawnPosition == null || targetPosition == null)
+        if (spawnPosition == null || targetPosition == null)
         {
             Debug.LogError("GameManager에 필요한 참조가 설정되지 않았습니다!");
             return;
@@ -81,37 +84,23 @@ public class GameManager : MonoBehaviour
     // 적 소환 메서드
     private void SpawnEnemy()
     {
-        Enemy enemyScript = null;
-        switch (SpawnDataList[CurrentStageIndex].Type)
-        {
-            case 1:
-                enemyScript = PoolManager.Pool.GetEnemy();
-                break;
-            case 2:
-                enemyScript = PoolManager.Pool.GetEnemy_1();
-                break;
-            case 3:
-                enemyScript = PoolManager.Pool.GetEnemy_2();
-                break;
-            default:
-                Debug.LogError("올바르지 않는 Enemy 타입이 입력되었습니다!");
-                goto case 1;
-        }
+        EnemyType enemyType = (EnemyType)SpawnDataList[CurrentStageIndex].Type;
+        Enemy enemy = PoolManager.Pool.GetEnemy(enemyType);
 
         // 생성한 에너미 관리를 위해 Set에 저장
-        enemySet.Add(enemyScript);
+        enemySet.Add(enemy);
 
         // 타겟 위치 설정
-        enemyScript.SetTargetPosition(targetPosition);
+        enemy.SetTargetPosition(targetPosition);
 
         // 생성 위치 설정
-        enemyScript.transform.position = spawnPosition.position;
+        enemy.transform.position = spawnPosition.position;
 
         // 상태 초기화
-        enemyScript.StatusReset();
+        enemy.StatusReset();
 
         // Enemy 도착 이벤트 등록 (OnEnemyReachedTarget 메서드를 호출하도록 설정)
-        StartCoroutine(CheckEnemyReachedTarget(enemyScript, enemyScript.gameObject));
+        StartCoroutine(CheckEnemyReachedTarget(enemy, enemy.gameObject));
     }
 
     // 적이 목표에 도달했는지 확인하는 코루틴

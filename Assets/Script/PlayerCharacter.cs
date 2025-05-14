@@ -13,7 +13,7 @@ public class PlayerCharacter : MonoBehaviour
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float attackCooldown = 1f;
     [SerializeField] private float attackFXDuration = 1f; // 이펙트 지속 시간
-    [SerializeField] private int attackFXType; // 이펙트 종류
+    [SerializeField] private FxType attackFXType; // 이펙트 종류
 
     private GameObject currentTarget;
     private float nextAttackTime;
@@ -114,28 +114,7 @@ public class PlayerCharacter : MonoBehaviour
     private void SpawnAttackFX(Vector3 position)
     {
         // 이펙트 가져오기 => 어떤 이펙트를 가져올지 구분하기
-        ParticleSystem targetFx = null;
-        switch (attackFXType)
-        {
-            case 1:
-                {
-                    targetFx = PoolManager.Pool.GetFx();
-                }
-                break;
-            case 2:
-                {
-                    targetFx = PoolManager.Pool.GetFx_1();
-                }
-                break;
-            case 3:
-                {
-                    targetFx = PoolManager.Pool.GetFx_2();
-                }
-                break;
-            default:
-                Debug.LogError($"올바르지 않는 이펙트 타입이 입력되었습니다! :{attackFXType}");
-                goto case 1;
-        }
+        ParticleSystem targetFx = PoolManager.Pool.GetFx(attackFXType);
 
         // 1. 이펙트를 대상 위치에 이펙트를 옮기고 재생하기
         targetFx.transform.position = position;

@@ -781,7 +781,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: efcb3cdc9c096214b952082cbe90f292, type: 2}
   - {fileID: 11400000, guid: b9ac4889593191b4eb840346646fdd27, type: 2}
   CurrentStageIndex: 0
-  enemyPrefab: {fileID: 8748881225814938285, guid: 165e3237fb4506549800e4bfef7facb7, type: 3}
   spawnPosition: {fileID: 865843478}
   targetPosition: {fileID: 1532055277}
   spawnTime: 2
@@ -893,18 +892,14 @@ MonoBehaviour:
   - {fileID: 7731697991418889129, guid: f0e78ec716bbe97408139c154f7d3aa8, type: 3}
   - {fileID: 7731697991418889129, guid: 5adf9fa071d95574e80dac6228d2556b, type: 3}
   - {fileID: 7731697991418889129, guid: 818792461fbd280408a9e1b1385f0014, type: 3}
-  RefEnemy: {fileID: 2916190832173686555, guid: c78e1179fe011a5418000344d4b1ea1e, type: 3}
-  EnemyPool: []
-  RefEnemy_1: {fileID: 2916190832173686555, guid: 62e207d1d8c332e48bdfa8a2d2c0cdb3, type: 3}
-  EnemyPool_1: []
-  RefEnemy_2: {fileID: 2916190832173686555, guid: 165e3237fb4506549800e4bfef7facb7, type: 3}
-  EnemyPool_2: []
-  RefFx: {fileID: 2433282508523890284, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
-  FxPool: []
-  RefFx_1: {fileID: 5985634496115995770, guid: 463cf9f7af4680240898f6aeba3fe3e6, type: 3}
-  FxPool_1: []
-  RefFx_2: {fileID: 6263782476919498311, guid: 1fd2749f2a4056446881dce86ed70c39, type: 3}
-  FxPool_2: []
+  RefEnemyList:
+  - {fileID: 2916190832173686555, guid: c78e1179fe011a5418000344d4b1ea1e, type: 3}
+  - {fileID: 2916190832173686555, guid: 62e207d1d8c332e48bdfa8a2d2c0cdb3, type: 3}
+  - {fileID: 2916190832173686555, guid: 165e3237fb4506549800e4bfef7facb7, type: 3}
+  RefFxList:
+  - {fileID: 2433282508523890284, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
+  - {fileID: 5985634496115995770, guid: 463cf9f7af4680240898f6aeba3fe3e6, type: 3}
+  - {fileID: 6263782476919498311, guid: 1fd2749f2a4056446881dce86ed70c39, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
