@@ -45,7 +45,7 @@ public class TowerPlacement : MonoBehaviour
 
             foreach (Collider targetCollider in targetColliderArray)
             {
-                if (targetCollider.gameObject.layer == playerCharacterLayer)
+                if ((playerCharacterLayer & ( 1 << targetCollider.gameObject.layer ) ) != 0)
                 {
                     isOccupied = true;
                     break;
