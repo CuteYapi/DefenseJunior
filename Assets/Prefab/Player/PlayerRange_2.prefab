@@ -132,3 +132,4 @@ MonoBehaviour:
   attackCooldown: 1
   attackFXDuration: 1
   attackFXType: 0
+  BuildCost: 4

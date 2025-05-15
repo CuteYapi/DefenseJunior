@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class TowerPlacement : MonoBehaviour
@@ -74,8 +75,6 @@ public class TowerPlacement : MonoBehaviour
     // 타워 배치 처리
     private void HandleTowerPlacement()
     {
-        if (!canPlaceTower) return;
-
         // 1~4번 키를 눌러 해당 타워 배치
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
@@ -102,6 +101,12 @@ public class TowerPlacement : MonoBehaviour
     // 타워 생성 함수
     private void PlaceTower(PlayerCharacterType type)
     {
+        if (canPlaceTower == false)
+        {
+            TextController.Text.SetErrorText(ErrorMessageType.PlacementConflict);
+            return;
+        }
+
         if ((int)type < 0 || (int)type > (int)PlayerCharacterType.Max)
         {
             Debug.LogError("Tower index out of range!");
@@ -109,6 +114,13 @@ public class TowerPlacement : MonoBehaviour
         }
 
         PlayerCharacter newPlayerCharacter = PoolManager.Pool.GetPlayerCharacter(type);
+
+        if (newPlayerCharacter.HasEnoughGold() == false)
+        {
+            TextController.Text.SetErrorText(ErrorMessageType.NotEnoughGold);
+            return;
+        }
+
         newPlayerCharacter.Initialize(hitInfo.point);
     }
 }

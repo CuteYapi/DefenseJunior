@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f2e4b80e9d98340a2cb360f445430e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 500
   maxHp: 500
   targetPosition: {fileID: 0}
   moveSpeed: 5
+  killGold: 3

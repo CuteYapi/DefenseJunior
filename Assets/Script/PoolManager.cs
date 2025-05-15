@@ -1,6 +1,8 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 
 public class PoolManager : MonoBehaviour
 {
@@ -104,6 +106,56 @@ public class PoolManager : MonoBehaviour
 
         // 4. 최종 반환
         return targetFx;
+    }
+
+    #endregion
+
+    #region ErrorMessage
+
+    public ErrorMessageView RefErrorMessage; // 참조용 메세지 UI 프리팹
+    public Dictionary<ErrorMessageType, List<ErrorMessageView>> ErrorMessagePool = new Dictionary<ErrorMessageType, List<ErrorMessageView>>();
+
+    public ErrorMessageView GetErrorMessage(ErrorMessageType type, Transform parentTransform)
+    {
+        // 1. 풀에 리스트 자체가 없는 경우 리스트를 생성
+        if (ErrorMessagePool.TryGetValue(type, out List<ErrorMessageView> targetList) == false)
+        {
+            targetList = new List<ErrorMessageView>();
+            ErrorMessagePool.Add(type, targetList);
+        }
+
+        // 2. 풀에서 사용 가능 오브젝트 검색
+        ErrorMessageView target = targetList.FirstOrDefault(errorMessage => errorMessage.gameObject.activeSelf == false);
+
+        // 3. 없을 경우 새롭게 생성 후 리스트에 추가
+        if (target == null)
+        {
+            target = Instantiate(RefErrorMessage, parentTransform);
+            target.name = $"{type}_{targetList.Count}";
+            switch (type)
+            {
+                case ErrorMessageType.NotEnoughGold:
+                {
+                    target.SetText("Not Enough Gold!!");
+                    break;
+                }
+                case ErrorMessageType.PlacementConflict:
+                {
+                    target.SetText("Something is already there");
+                    break;
+                }
+                default:
+                {
+                    target.SetText(String.Empty);
+                    break;
+                }
+            }
+
+            targetList.Add(target);
+        }
+
+        // 4. 최종 반환
+        return target;
     }
 
     #endregion

@@ -1,13 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; // UI 컴포넌트 접근을 위해 추가
 
 public class GameManager : MonoBehaviour
 {
+    #region Singleton
+    public static GameManager Game { get; private set; }
+
+    private void Awake()
+    {
+        Game = this;
+    }
+    #endregion
+
     // 스테이지 관련 변수
     [Header("Stage Settings")]
     public List<SpawnData> SpawnDataList = new List<SpawnData>();
-    [SerializeField] private int CurrentStageIndex;
+
+    private int _currentStageIndex;
+    public int CurrentStageIndex
+    {
+        get => _currentStageIndex;
+        set
+        {
+            _currentStageIndex = value;
+            TextController.Text.SetStageText(CurrentStageIndex);
+        }
+    }
 
     // 적 소환 관련 변수
     [Header("Enemy Spawn Settings")]
@@ -16,25 +36,41 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float spawnTime = 2f; // 적 소환 간격
     private HashSet<Enemy> enemySet = new HashSet<Enemy>();
 
-    // 플레이어 관련 변수
-    [Header("Player Settings")]
-    [SerializeField] private int playerLifePoint = 3; // 플레이어 생명력
-    [SerializeField] private bool gameActive = true; // 게임 활성화 상태
-
-    // UI 관련 변수 (필요시 추가)
-    [Header("UI References")]
-    [SerializeField] private UnityEngine.UI.Text lifePointText; // 생명력 표시 텍스트
-
-    #region Singleton
-
-    public static GameManager Game { get; private set; }
-
-    private void Awake()
+    // 플레이어 관련 변수 (ResourceManager에서 통합)
+    [Header("Player Resources")]
+    // 보유한 골드
+    private int _currentGold;
+    public int CurrentGold
     {
-        Game = this;
+        get => _currentGold;
+        private set
+        {
+            if (value < 0)
+            {
+                value = 0;
+                Debug.LogError("골드가 0 이하가 될 수는 없습니다!");
+            }
+            _currentGold = value;
+            TextController.Text.SetGoldText(CurrentGold);
+        }
     }
 
-    #endregion
+    // 보유한 생명력
+    private int _currentLives;
+    public int GetCurrentLives()
+    {
+        return _currentLives;
+    }
+
+    public void SetCurrentLives(int amount)
+    {
+        _currentLives = amount;
+        TextController.Text.SetLifeText(GetCurrentLives());
+    }
+
+    [SerializeField] private int startGold; // 시작시 보유 골드
+    [SerializeField] private int startLives; // 시작시 보유 생명력
+    [SerializeField] private bool gameActive = true; // 게임 활성화 상태
 
     // 시작 시 호출
     private void Start()
@@ -47,9 +83,8 @@ public class GameManager : MonoBehaviour
         }
 
         CurrentStageIndex = 0;
-
-        // UI 업데이트
-        UpdateLifePointUI();
+        CurrentGold = startGold;
+        SetCurrentLives(startLives);
 
         // 적 소환 코루틴 시작
         StartCoroutine(SpawnEnemyRoutine());
@@ -66,7 +101,7 @@ public class GameManager : MonoBehaviour
             SpawnEnemy();
             spawnCount++;
 
-            if(spawnCount >= SpawnDataList[CurrentStageIndex].Count)
+            if (spawnCount >= SpawnDataList[CurrentStageIndex].Count)
             {
                 CurrentStageIndex++;
                 spawnCount = 0;
@@ -107,44 +142,51 @@ public class GameManager : MonoBehaviour
     private IEnumerator CheckEnemyReachedTarget(Enemy enemy, GameObject enemyObject)
     {
         // 적이 살아있고, 목표 위치와 거리가 가까워질 때까지 대기
-        while (enemy.IsAlive() && Vector3.Distance(enemyObject.transform.position, targetPosition.position) > 0.1f)
+        while (enemy.IsAlive && Vector3.Distance(enemyObject.transform.position, targetPosition.position) > 0.1f)
         {
             yield return null; // 다음 프레임까지 대기
         }
 
         // 적이 아직 살아있고 목표에 도달했다면
-        if (enemy.IsAlive())
+        if (enemy.IsAlive)
         {
             // 플레이어 생명력 감소
-            DecreasePlayerLifePoint();
+            TakeDamage(1);  // 한 명의 적당 1의 데미지
 
-            // 적 비활성화 (Enemy 스크립트의 Dead 메서드는 private이므로 직접 호출할 수 없음)
+            // 적 비활성화
             enemyObject.SetActive(false);
         }
     }
 
-    // 플레이어 생명력 감소
-    private void DecreasePlayerLifePoint()
+    // ResourceManager에서 통합된 메서드들
+
+    // 골드 소비 메서드
+    public bool SpendGold(int amount)
     {
-        playerLifePoint--;
-        Debug.Log($"플레이어 생명력이 감소했습니다. 남은 생명력: {playerLifePoint}");
-
-        // UI 업데이트
-        UpdateLifePointUI();
-
-        // 생명력이 0이 되면 게임 종료
-        if (playerLifePoint <= 0)
+        if (CurrentGold >= amount)
         {
-            GameOver();
+            CurrentGold -= amount;
+            return true;
         }
+        return false;
     }
 
-    // UI 업데이트
-    private void UpdateLifePointUI()
+    // 골드 획득 메서드
+    public void AddGold(int amount)
     {
-        if (lifePointText != null)
+        CurrentGold += amount;
+    }
+
+    // 생명력 감소 메서드
+    public void TakeDamage(int amount)
+    {
+        int newCurrentLives = GetCurrentLives() - amount;
+        SetCurrentLives(newCurrentLives);
+
+        // 생명력이 0이 되면 게임 종료
+        if (GetCurrentLives() <= 0)
         {
-            lifePointText.text = $"Life: {playerLifePoint}";
+            GameOver();
         }
     }
 
@@ -157,7 +199,7 @@ public class GameManager : MonoBehaviour
         // 모든 적 비활성화
         foreach (Enemy enemy in enemySet)
         {
-            enemy.Damaged(enemy.GetHp());
+            enemy.Damaged(enemy.Hp);
         }
 
         // 게임 오버 UI 표시 등 추가 기능 구현 (필요시)
@@ -166,15 +208,19 @@ public class GameManager : MonoBehaviour
     // 게임 재시작 (필요시)
     public void RestartGame()
     {
-        playerLifePoint = 3;
+        // 자원 초기화
+        CurrentGold = startGold;
+        SetCurrentLives(startLives);
+        CurrentStageIndex = 0;
+
         gameActive = true;
-        UpdateLifePointUI();
 
         // 기존 적 정리
         foreach (Enemy enemy in enemySet)
         {
             Destroy(enemy.gameObject);
         }
+        enemySet.Clear();
 
         // 적 소환 코루틴 재시작
         StartCoroutine(SpawnEnemyRoutine());

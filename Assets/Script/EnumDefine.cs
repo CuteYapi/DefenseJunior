@@ -33,3 +33,13 @@ public enum FxType
 
     Max,
 }
+
+public enum ErrorMessageType
+{
+    None = -1,
+
+    NotEnoughGold,
+    PlacementConflict,
+
+    Max,
+}

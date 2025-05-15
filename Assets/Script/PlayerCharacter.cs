@@ -15,6 +15,9 @@ public class PlayerCharacter : MonoBehaviour
     [SerializeField] private float attackFXDuration = 1f; // 이펙트 지속 시간
     [SerializeField] private FxType attackFXType; // 이펙트 종류
 
+    [Header("Build Settings")] 
+    public int BuildCost;
+
     private GameObject currentTarget;
     private float nextAttackTime;
 
@@ -22,6 +25,13 @@ public class PlayerCharacter : MonoBehaviour
     {
         gameObject.SetActive(true);
         transform.position = spawnPosition;
+
+        GameManager.Game.SpendGold(BuildCost);
+    }
+
+    public bool HasEnoughGold()
+    {
+        return GameManager.Game.CurrentGold >= BuildCost;
     }
 
     private void Update()
@@ -87,7 +97,7 @@ public class PlayerCharacter : MonoBehaviour
     {
         // 타겟의 Enemy 컴포넌트를 확인
         var enemy = target.GetComponent<Enemy>();
-        return enemy != null && enemy.IsAlive();
+        return enemy != null && enemy.IsAlive;
     }
 
     private void AttackTarget()
@@ -103,7 +113,7 @@ public class PlayerCharacter : MonoBehaviour
             SpawnAttackFX(currentTarget.transform.position);
 
             // 공격 후 타겟이 죽었는지 확인
-            if (!enemy.IsAlive())
+            if (!enemy.IsAlive)
             {
                 currentTarget = null;
             }
