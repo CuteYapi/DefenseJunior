@@ -9,29 +9,146 @@ public class PlayerCharacter : MonoBehaviour
     [SerializeField] private LayerMask targetLayer;  // Inspector에서 공격할 대상의 레이어를 설정
     [SerializeField] private Color gizmoColor = Color.red;  // Gizmo 색상
 
-    [Header("Attack Settings")]
+    [Header("PlayerData")]
+    public List<PlayerCharacterData> PlayerCharacterDataList = new List<PlayerCharacterData>();
+    
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float attackCooldown = 1f;
+    public int BuildCost;
+
+    [Header("Attack Settings")]
     [SerializeField] private float attackFXDuration = 1f; // 이펙트 지속 시간
     [SerializeField] private FxType attackFXType; // 이펙트 종류
 
-    [Header("Build Settings")] 
-    public int BuildCost;
+    [Header("Upgrade System")]
+    [SerializeField] private int currentLevel = 1; // 현재 레벨 (1부터 시작)
+    private int currentDataIndex = 0; // 현재 사용 중인 데이터 인덱스
 
     private GameObject currentTarget;
     private float nextAttackTime;
+
+    // 레벨 관련 프로퍼티
+    public int CurrentLevel => currentLevel;
+    public int MaxLevel => PlayerCharacterDataList.Count;
+    public bool IsMaxLevel => currentLevel >= MaxLevel;
 
     public void Initialize(Vector3 spawnPosition)
     {
         gameObject.SetActive(true);
         transform.position = spawnPosition;
 
+        // 초기 데이터 설정 (0번 인덱스)
+        ApplyCharacterData(0);
+
         GameManager.Game.SpendGold(BuildCost);
     }
 
-    public bool HasEnoughGold()
+    public bool HasBuildableGold()
     {
         return GameManager.Game.CurrentGold >= BuildCost;
+    }
+
+    // 업그레이드 가능 여부 확인
+    public bool CanUpgrade()
+    {
+        if (IsMaxLevel) return false;
+
+        int nextDataIndex = currentDataIndex + 1;
+        if (nextDataIndex >= PlayerCharacterDataList.Count) return false;
+
+        int upgradeCost = GetUpgradeCost();
+        return GameManager.Game.CurrentGold >= upgradeCost;
+    }
+
+    // 업그레이드 비용 계산
+    public int GetUpgradeCost()
+    {
+        if (IsMaxLevel) return 0;
+
+        int nextDataIndex = currentDataIndex + 1;
+        if (nextDataIndex >= PlayerCharacterDataList.Count) return 0;
+
+        return PlayerCharacterDataList[nextDataIndex].BuildCost;
+    }
+
+    public PlayerCharacterData GetPlayerCharacterData()
+    {
+        return PlayerCharacterDataList[currentDataIndex];
+    }
+
+    // 업그레이드 실행
+    public bool Upgrade()
+    {
+        // 업그레이드 가능 여부 확인
+        if (!CanUpgrade())
+        {
+            if (IsMaxLevel)
+            {
+                TextController.Text.SetMessageText(MessageType.MaxLevelReached);
+            }
+            else
+            {
+                TextController.Text.SetMessageText(MessageType.UpgradeNotPossible);
+            }
+            return false;
+        }
+
+        int nextDataIndex = currentDataIndex + 1;
+        int upgradeCost = PlayerCharacterDataList[nextDataIndex].BuildCost;
+
+        // 골드 확인 및 소모
+        if (GameManager.Game.CurrentGold < upgradeCost)
+        {
+            TextController.Text.SetMessageText(MessageType.NotEnoughGoldForUpgrade);
+            return false;
+        }
+
+        // 업그레이드 실행
+        GameManager.Game.SpendGold(upgradeCost);
+        currentDataIndex = nextDataIndex;
+        currentLevel++;
+
+        // 새로운 데이터 적용
+        ApplyCharacterData(currentDataIndex);
+
+        TextController.Text.SetMessageText(MessageType.UpgradeSuccess);
+        return true;
+    }
+
+    // 캐릭터 데이터 적용
+    private void ApplyCharacterData(int dataIndex)
+    {
+        if (dataIndex < 0 || dataIndex >= PlayerCharacterDataList.Count)
+        {
+            // 에러는 Debug.Log로 유지 (개발자용 정보)
+            Debug.LogError($"잘못된 데이터 인덱스: {dataIndex}");
+            return;
+        }
+
+        PlayerCharacterData data = PlayerCharacterDataList[dataIndex];
+        attackDamage = data.AttackDamage;
+        attackCooldown = data.AttackCooldown;
+        BuildCost = data.BuildCost;
+
+        currentDataIndex = dataIndex;
+    }
+
+    // 다음 레벨 정보 가져오기 (UI 표시용)
+    public PlayerCharacterData GetNextLevelData()
+    {
+        if (IsMaxLevel) return null;
+
+        int nextDataIndex = currentDataIndex + 1;
+        if (nextDataIndex >= PlayerCharacterDataList.Count) return null;
+
+        return PlayerCharacterDataList[nextDataIndex];
+    }
+
+    // 현재 레벨 정보 가져오기
+    public PlayerCharacterData GetCurrentLevelData()
+    {
+        if (currentDataIndex >= PlayerCharacterDataList.Count) return null;
+        return PlayerCharacterDataList[currentDataIndex];
     }
 
     private void Update()
@@ -142,7 +259,6 @@ public class PlayerCharacter : MonoBehaviour
         Fx.Stop();
         Fx.gameObject.SetActive(false);
     }
-
 
     // 디버그용으로 감지 범위를 에디터에서 시각화
     private void OnDrawGizmos()

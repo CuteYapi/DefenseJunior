@@ -34,12 +34,17 @@ public enum FxType
     Max,
 }
 
-public enum ErrorMessageType
+// MessageType enum 업데이트
+public enum MessageType
 {
     None = -1,
 
     NotEnoughGold,
     PlacementConflict,
+    UpgradeNotPossible,
+    NotEnoughGoldForUpgrade,
+    UpgradeSuccess,
+    MaxLevelReached,
 
     Max,
 }

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 
-public class ErrorMessageView : MonoBehaviour
+public class MessageView : MonoBehaviour
 {
     public TextMeshProUGUI Text;
     public float[] WaitTime;

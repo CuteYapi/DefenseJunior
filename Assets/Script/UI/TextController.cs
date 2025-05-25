@@ -15,9 +15,14 @@ public class TextController : MonoBehaviour
     public TextMeshProUGUI LifeText;
     public TextMeshProUGUI StageText;
 
-    public Transform ErrorMessageScrollTransform;
-    [SerializeField] private int errorMessageCount;
-    private Queue<ErrorMessageView> errorMessageQueue = new Queue<ErrorMessageView>();
+    public Transform MessageScrollTransform;
+    [SerializeField] private int messageCount;
+    private Queue<MessageView> messageQueue = new Queue<MessageView>();
+
+    public TextMeshProUGUI PlayerNameText;
+    public TextMeshProUGUI PlayerCostText;
+    public TextMeshProUGUI PlayerDamageText;
+    public TextMeshProUGUI PlayerAttackCooldownText;
 
     public void SetGoldText(int goldAmount)
     {
@@ -34,18 +39,26 @@ public class TextController : MonoBehaviour
         StageText.text = $"{stageAmount} Stage";
     }
 
-    public void SetErrorText(ErrorMessageType type)
+    public void SetMessageText(MessageType type)
     {
-        if (errorMessageQueue.Count > errorMessageCount)
+        if (messageQueue.Count > messageCount)
         {
-            ErrorMessageView oldMessage = errorMessageQueue.Dequeue();
+            MessageView oldMessage = messageQueue.Dequeue();
             oldMessage.Close();
         }
 
-        ErrorMessageView newMessage = PoolManager.Pool.GetErrorMessage(type, ErrorMessageScrollTransform);
+        MessageView newMessage = PoolManager.Pool.GetMessage(type, MessageScrollTransform);
         newMessage.transform.SetAsLastSibling();
         newMessage.Open();
 
-        errorMessageQueue.Enqueue(newMessage);
+        messageQueue.Enqueue(newMessage);
+    }
+
+    public void SetPlayerInformationText(string name, PlayerCharacterData data)
+    {
+        PlayerNameText.text = name;
+        PlayerCostText.text = data.BuildCost.ToString();
+        PlayerDamageText.text = data.AttackDamage.ToString();
+        PlayerAttackCooldownText.text = data.AttackCooldown.ToString();
     }
 }

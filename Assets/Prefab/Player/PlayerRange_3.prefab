@@ -128,8 +128,13 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
+  PlayerCharacterDataList:
+  - {fileID: 11400000, guid: 0124907ebc70ee44ca48bb9eb23fa861, type: 2}
+  - {fileID: 11400000, guid: a4320775fb4ecfa4fb603108c50e6b82, type: 2}
+  - {fileID: 11400000, guid: c19d682019d863c49a27a7cc2c3e53bd, type: 2}
   attackDamage: 10
   attackCooldown: 1
+  BuildCost: 5
   attackFXDuration: 1
   attackFXType: 1
-  BuildCost: 5
+  currentLevel: 1

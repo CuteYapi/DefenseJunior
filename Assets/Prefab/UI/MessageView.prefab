@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8201839491362173409}
   - component: {fileID: -8583089286795163810}
   m_Layer: 5
-  m_Name: ErrorMessage
+  m_Name: MessageView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

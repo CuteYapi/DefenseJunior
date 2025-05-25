@@ -110,38 +110,58 @@ public class PoolManager : MonoBehaviour
 
     #endregion
 
-    #region ErrorMessage
+    #region Message
 
-    public ErrorMessageView RefErrorMessage; // 참조용 메세지 UI 프리팹
-    public Dictionary<ErrorMessageType, List<ErrorMessageView>> ErrorMessagePool = new Dictionary<ErrorMessageType, List<ErrorMessageView>>();
+    public MessageView RefMessage; // 참조용 메세지 UI 프리팹
+    public Dictionary<MessageType, List<MessageView>> MessagePool = new Dictionary<MessageType, List<MessageView>>();
 
-    public ErrorMessageView GetErrorMessage(ErrorMessageType type, Transform parentTransform)
+    public MessageView GetMessage(MessageType type, Transform parentTransform)
     {
         // 1. 풀에 리스트 자체가 없는 경우 리스트를 생성
-        if (ErrorMessagePool.TryGetValue(type, out List<ErrorMessageView> targetList) == false)
+        if (MessagePool.TryGetValue(type, out List<MessageView> targetList) == false)
         {
-            targetList = new List<ErrorMessageView>();
-            ErrorMessagePool.Add(type, targetList);
+            targetList = new List<MessageView>();
+            MessagePool.Add(type, targetList);
         }
 
         // 2. 풀에서 사용 가능 오브젝트 검색
-        ErrorMessageView target = targetList.FirstOrDefault(errorMessage => errorMessage.gameObject.activeSelf == false);
+        MessageView target = targetList.FirstOrDefault(errorMessage => errorMessage.gameObject.activeSelf == false);
 
         // 3. 없을 경우 새롭게 생성 후 리스트에 추가
         if (target == null)
         {
-            target = Instantiate(RefErrorMessage, parentTransform);
+            target = Instantiate(RefMessage, parentTransform);
             target.name = $"{type}_{targetList.Count}";
             switch (type)
             {
-                case ErrorMessageType.NotEnoughGold:
+                case MessageType.NotEnoughGold:
                 {
                     target.SetText("Not Enough Gold!!");
                     break;
                 }
-                case ErrorMessageType.PlacementConflict:
+                case MessageType.PlacementConflict:
                 {
                     target.SetText("Something is already there");
+                    break;
+                }
+                case MessageType.UpgradeNotPossible:
+                {
+                    target.SetText("Upgrade not possible");
+                    break;
+                }
+                case MessageType.NotEnoughGoldForUpgrade:
+                {
+                    target.SetText("Not enough gold for upgrade");
+                    break;
+                }
+                case MessageType.UpgradeSuccess:
+                {
+                    target.SetText("Upgrade successful!");
+                    break;
+                }
+                case MessageType.MaxLevelReached:
+                {
+                    target.SetText("Maximum level reached");
                     break;
                 }
                 default:
